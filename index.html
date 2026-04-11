@@ -1,202 +1,39 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Business Data Analyzer — AI-Powered Insights</title>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8f9fa; color: #1a1a1a; min-height: 100vh; }
-  header { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between; }
-  header h1 { font-size: 18px; font-weight: 600; }
-  header span { font-size: 13px; color: #6b7280; background: #f3f4f6; padding: 4px 10px; border-radius: 20px; }
-  .hero { text-align: center; padding: 3rem 1rem 2rem; }
-  .hero h2 { font-size: 32px; font-weight: 700; margin-bottom: 10px; }
-  .hero p { font-size: 16px; color: #6b7280; max-width: 500px; margin: 0 auto; }
-  .main { max-width: 860px; margin: 0 auto; padding: 0 1rem 4rem; }
-  .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; }
-  .card label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.04em; }
-  textarea { width: 100%; min-height: 130px; font-size: 13px; font-family: monospace; border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px 12px; resize: vertical; background: #fafafa; color: #1a1a1a; }
-  textarea:focus { outline: none; border-color: #3b82f6; }
-  .examples { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
-  .ex-btn { font-size: 12px; color: #6b7280; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 6px; padding: 4px 10px; cursor: pointer; }
-  .ex-btn:hover { background: #e5e7eb; }
-  .prompt-row { display: flex; gap: 8px; }
-  .prompt-row input { flex: 1; font-size: 14px; border: 1px solid #e5e7eb; border-radius: 8px; padding: 0 12px; height: 40px; background: #fafafa; color: #1a1a1a; }
-  .prompt-row input:focus { outline: none; border-color: #3b82f6; }
-  .analyze-btn { height: 40px; padding: 0 24px; font-size: 14px; font-weight: 600; color: #fff; background: #2563eb; border: none; border-radius: 8px; cursor: pointer; white-space: nowrap; }
-  .analyze-btn:hover { background: #1d4ed8; }
-  .analyze-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 1rem; }
-  .metric { background: #f8f9fa; border: 1px solid #e5e7eb; border-radius: 10px; padding: 1rem; }
-  .metric-label { font-size: 12px; color: #6b7280; margin-bottom: 4px; }
-  .metric-value { font-size: 24px; font-weight: 700; color: #111827; }
-  .metric-change { font-size: 12px; margin-top: 2px; }
-  .up { color: #16a34a; } .down { color: #dc2626; }
-  .insight-box { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1rem; }
-  .insight-box p { font-size: 14px; color: #1e40af; line-height: 1.7; }
-  .chart-area { position: relative; height: 240px; }
-  .loading { text-align: center; padding: 2rem; color: #6b7280; font-size: 14px; display: none; }
-  .results { display: none; }
-  .followups { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 1rem; }
-  .fq-btn { font-size: 13px; color: #1d4ed8; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 6px 14px; cursor: pointer; }
-  .fq-btn:hover { background: #dbeafe; }
-  .apikey-notice { background: #fefce8; border: 1px solid #fde68a; border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1rem; font-size: 13px; color: #92400e; }
-  .apikey-notice a { color: #1d4ed8; }
-  .apikey-row { display: flex; gap: 8px; margin-top: 8px; }
-  .apikey-row input { flex: 1; font-size: 13px; border: 1px solid #e5e7eb; border-radius: 8px; padding: 0 12px; height: 36px; font-family: monospace; background: #fff; }
-  .apikey-row input:focus { outline: none; border-color: #3b82f6; }
-  .save-btn { height: 36px; padding: 0 16px; font-size: 13px; color: #fff; background: #16a34a; border: none; border-radius: 8px; cursor: pointer; }
-  footer { text-align: center; padding: 2rem; font-size: 13px; color: #9ca3af; border-top: 1px solid #e5e7eb; background: #fff; }
-</style>
-</head>
-<body>
-
-<header>
-  <h1>📊 Business Data Analyzer</h1>
-  <span>Powered by Claude AI</span>
-</header>
-
-<div class="hero">
-  <h2>Turn your data into insights</h2>
-  <p>Paste any business data, ask a question, and get AI-powered analysis in seconds.</p>
-</div>
-
-<div class="main">
-
-  <div class="apikey-notice" id="apikey-section">
-    <strong>Setup required:</strong> Enter your Anthropic API key to activate the AI.
-    Get one free at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>
-    <div class="apikey-row">
-      <input type="password" id="api-key-input" placeholder="sk-ant-..." />
-      <button class="save-btn" onclick="saveKey()">Save key</button>
-    </div>
-  </div>
-
-  <div class="card">
-    <label>Your data</label>
-    <textarea id="data-input" placeholder="Paste CSV, a table, or raw numbers here...
-Example:
-Month, Revenue, Costs, Customers
-Jan, 12000, 8000, 140
-Feb, 15000, 9000, 170
-Mar, 11000, 7500, 130"></textarea>
-    <div class="examples">
-      <span style="font-size:12px;color:#9ca3af;align-self:center;">Try:</span>
-      <button class="ex-btn" onclick="loadExample('sales')">Monthly sales</button>
-      <button class="ex-btn" onclick="loadExample('ecommerce')">E-commerce KPIs</button>
-      <button class="ex-btn" onclick="loadExample('expenses')">Expense breakdown</button>
-    </div>
-  </div>
-
-  <div class="card">
-    <label>Your question</label>
-    <div class="prompt-row">
-      <input id="question-input" type="text" placeholder="e.g. What are the key trends? Which month performed best?" />
-      <button class="analyze-btn" id="analyze-btn" onclick="analyze()">Analyze →</button>
-    </div>
-  </div>
-
-  <div class="loading" id="loading">⏳ Analyzing your data with AI...</div>
-
-  <div class="results" id="results">
-    <div class="metrics-grid" id="metrics-grid"></div>
-    <div class="insight-box"><p id="insight-text"></p></div>
-    <div class="card">
-      <label>Visualization</label>
-      <div class="chart-area"><canvas id="myChart"></canvas></div>
-    </div>
-    <div class="followups" id="followups"></div>
-  </div>
-
-</div>
-
-<footer>Business Data Analyzer &mdash; Powered by Claude AI &mdash; &copy; 2026</footer>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script>
-const examples = {
-  sales: `Month, Revenue, Costs, Customers\nJan, 12000, 8000, 140\nFeb, 15000, 9000, 170\nMar, 11000, 7500, 130\nApr, 18000, 10000, 210\nMay, 22000, 12000, 260\nJun, 19000, 11000, 230`,
-  ecommerce: `Week, Orders, Revenue, Returns\nW1, 320, 9600, 18\nW2, 410, 14350, 22\nW3, 380, 13300, 15\nW4, 520, 20800, 28\nW5, 490, 19600, 20\nW6, 610, 26840, 31`,
-  expenses: `Category, Q1, Q2, Q3, Q4\nMarketing, 8000, 10000, 9500, 14000\nPayroll, 30000, 30000, 32000, 32000\nTools, 2000, 2200, 2100, 2500\nOffice, 1500, 1500, 1500, 1500`
-};
+async function startAudit() {
+    const url = document.getElementById('urlInput').value;
+    const siteType = document.getElementById('siteType').value;
+    const btn = document.getElementById('auditBtn');
+    const resultsDiv = document.getElementById('resultsArea');
 
-function loadExample(k) {
-  document.getElementById('data-input').value = examples[k].replace(/\\n/g, '\n');
-  const qs = { sales: 'What are the revenue trends and best performing month?', ecommerce: 'How are orders and revenue growing?', expenses: 'Which category grew the most?' };
-  document.getElementById('question-input').value = qs[k];
-}
+    if(!url) return alert("Please enter a URL");
 
-function saveKey() {
-  const k = document.getElementById('api-key-input').value.trim();
-  if (!k) return alert('Please enter your API key.');
-  localStorage.setItem('anthropic_key', k);
-  document.getElementById('apikey-section').style.display = 'none';
-  alert('API key saved!');
-}
+    btn.innerText = "Analyzing Risk...";
+    btn.disabled = true;
 
-window.onload = function() {
-  const k = localStorage.getItem('anthropic_key');
-  if (k) document.getElementById('apikey-section').style.display = 'none';
-};
-
-let chartInstance = null;
-
-async function analyze() {
-  const apiKey = localStorage.getItem('anthropic_key');
-  if (!apiKey) { alert('Please enter your Anthropic API key first.'); return; }
-  const data = document.getElementById('data-input').value.trim();
-  const question = document.getElementById('question-input').value.trim();
-  if (!data) { alert('Please paste some data first.'); return; }
-
-  const btn = document.getElementById('analyze-btn');
-  btn.disabled = true;
-  document.getElementById('loading').style.display = 'block';
-  document.getElementById('results').style.display = 'none';
-
-  const prompt = `You are a business data analyst. The user has pasted this data:\n\n${data}\n\nTheir question: ${question || 'Give me key insights and trends.'}\n\nRespond ONLY with a JSON object (no markdown, no extra text):\n{\n  "metrics": [{"label": "...", "value": "...", "change": "+12%", "direction": "up"}],\n  "insight": "2-3 sentence key insight",\n  "chart": {"type": "bar or line", "labels": [...], "datasets": [{"label": "...", "data": [...]}]},\n  "followups": ["Question 1?", "Question 2?", "Question 3?"]\n}`;
-
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-allow-browser': 'true' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages: [{ role: 'user', content: prompt }] })
-    });
-    const d = await res.json();
-    const text = d.content.map(i => i.text || '').join('').replace(/```json|```/g, '').trim();
-    const parsed = JSON.parse(text);
-    renderResults(parsed);
-  } catch(e) {
-    alert('Something went wrong. Check your API key and try again.');
-  }
-  btn.disabled = false;
-  document.getElementById('loading').style.display = 'none';
-}
-
-function renderResults(data) {
-  const grid = document.getElementById('metrics-grid');
-  grid.innerHTML = (data.metrics || []).map(m => `<div class="metric"><div class="metric-label">${m.label}</div><div class="metric-value">${m.value}</div>${m.change ? `<div class="metric-change ${m.direction === 'up' ? 'up' : 'down'}">${m.change}</div>` : ''}</div>`).join('');
-  document.getElementById('insight-text').textContent = data.insight || '';
-  if (chartInstance) chartInstance.destroy();
-  const ctx = document.getElementById('myChart').getContext('2d');
-  const colors = ['#2563eb','#16a34a','#d97706','#dc2626','#7c3aed'];
-  chartInstance = new Chart(ctx, {
-    type: data.chart?.type || 'bar',
-    data: {
-      labels: data.chart?.labels || [],
-      datasets: (data.chart?.datasets || []).map((ds, i) => ({ label: ds.label, data: ds.data, backgroundColor: colors[i % colors.length] + '33', borderColor: colors[i % colors.length], borderWidth: 2, tension: 0.4, fill: true }))
-    },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { font: { size: 12 } } } } }
-  });
-  const fq = document.getElementById('followups');
-  fq.innerHTML = (data.followups || []).map(q => `<button class="fq-btn" onclick="askFollowup('${q.replace(/'/g,"\\'")}')">→ ${q}</button>`).join('');
-  document.getElementById('results').style.display = 'block';
-}
-
-function askFollowup(q) {
-  document.getElementById('question-input').value = q;
-  analyze();
+    try {
+        const response = await fetch('/api/scan', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ url, siteType })
+        });
+        
+        const data = await response.json();
+        
+        // عرض النتائج في الصفحة
+        resultsDiv.innerHTML = `
+            <div class="result-card">
+                <h3>Risk Level: <span style="color:red">${data.risk_level}</span></h3>
+                <p>${data.summary}</p>
+                <ul>${data.top_issues.map(i => `<li>${i}</li>`).join('')}</ul>
+                <p><strong>Legal Note:</strong> ${data.legal_impact}</p>
+                <a href="YOUR_BILLGANG_LINK" class="buy-btn">Get Full Legal Remediation Plan ($29)</a>
+            </div>
+        `;
+    } catch (e) {
+        alert("Check your API keys in Vercel!");
+    } finally {
+        btn.innerText = "Check Compliance";
+        btn.disabled = false;
+    }
 }
 </script>
-</body>
-</html>
